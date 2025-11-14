@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zone Spawn System Generator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Zone Spawn System Generator</h1>
+      <p class="subtitle">Create spawn zone configurations for your game server</p>
+    </header>
+
+    <nav class="breadcrumb">
+      <button class="btn-back" onclick="goBack()">← Back to Home</button>
+    </nav>
+
+    <main>
+      <section class="tools-section">
+        <h2>Spawn Configuration Generator</h2>
+        
+        <div class="tool-card spawn-generator">
+          <h3>Global Settings</h3>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="systemEnabled">System Enabled</label>
+              <select id="systemEnabled" class="input-field">
+                <option value="1">Enabled (1)</option>
+                <option value="0">Disabled (0)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="checkInterval">Check Interval (seconds)</label>
+              <input type="number" id="checkInterval" class="input-field" value="7" min="1">
+            </div>
+
+            <div class="form-group">
+              <label for="maxEntities">Max Entities Per Zone</label>
+              <input type="number" id="maxEntities" class="input-field" value="100" min="1">
+            </div>
+
+            <div class="form-group">
+              <label for="entityLifetime">Entity Lifetime (seconds)</label>
+              <input type="number" id="entityLifetime" class="input-field" value="600" min="0">
+            </div>
+
+            <div class="form-group">
+              <label for="minSpawnDistance">Min Spawn Distance From Player</label>
+              <input type="number" id="minSpawnDistance" class="input-field" value="100" min="0">
+            </div>
+          </div>
+
+          <hr class="section-divider">
+
+          <h3>Zones Management</h3>
+          <p class="info-text">Add and configure spawn zones. Each zone can have multiple spawn points.</p>
+          
+          <div id="zonesContainer"></div>
+
+          <div class="button-group">
+            <button class="btn btn-add" onclick="addZone()">+ Add Zone</button>
+          </div>
+
+          <hr class="section-divider">
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="generateJSON()">Generate JSON</button>
+            <button class="btn btn-success" onclick="copyJSON()">Copy to Clipboard</button>
+            <button class="btn btn-warning" onclick="clearAll()">Clear All</button>
+          </div>
+
+          <div class="output-section">
+            <h4>Generated JSON:</h4>
+            <pre id="jsonOutput" class="json-output"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../renderer/navigation.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

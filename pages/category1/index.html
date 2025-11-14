@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teleport Generator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Teleport Generator</h1>
+      <p class="subtitle">Create teleport entry JSON configurations for your game</p>
+    </header>
+
+    <nav class="breadcrumb">
+      <button class="btn-back" onclick="goBack()">← Back to Home</button>
+    </nav>
+
+    <main>
+      <section class="tools-section">
+        <h2>Teleport Entry Generator</h2>
+        
+        <div class="tool-card teleport-generator">
+          <h3>Teleport Entries Management</h3>
+          <p>Add multiple teleport entries to generate your configuration</p>
+          
+          <div id="teleportsContainer"></div>
+
+          <div class="button-group">
+            <button class="btn btn-add" onclick="addTeleport()">+ Add Teleport Entry</button>
+          </div>
+
+          <hr class="section-divider">
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="generateJSON()">Generate JSON</button>
+            <button class="btn btn-success" onclick="copyJSON()">Copy to Clipboard</button>
+            <button class="btn btn-warning" onclick="clearForm()">Clear All</button>
+          </div>
+
+          <div class="output-section">
+            <h4>Generated JSON:</h4>
+            <pre id="jsonOutput" class="json-output"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../renderer/navigation.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

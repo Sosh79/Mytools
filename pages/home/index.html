@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Page</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Welcome to Tools Application</h1>
+      <p class="subtitle">Choose the category you want to access</p>
+    </header>
+
+    <main>
+      <div class="cards-container">
+        <div class="card">
+          <h2>Teleport Generator</h2>
+          <p>Create and generate teleport entry JSON configurations easily</p>
+          <button class="btn btn-primary" onclick="goToCategory('category1')">
+            Go to Teleport Generator
+          </button>
+        </div>
+
+        <div class="card">
+          <h2>Zone Spawn System</h2>
+          <p>Create and configure spawn zones with multiple spawn points for your game</p>
+          <button class="btn btn-primary" onclick="goToCategory('category2')">
+            Go to Zone Spawn System
+          </button>
+        </div>
+
+        <div class="card">
+          <h2>New Category</h2>
+          <p>You can easily add more categories</p>
+          <button class="btn btn-secondary" disabled>
+            Coming Soon
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Use the menu at the top of the screen for quick navigation</p>
+    </footer>
+  </div>
+
+  <script src="../../renderer/navigation.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
