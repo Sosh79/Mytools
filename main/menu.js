@@ -16,6 +16,10 @@ function createMenu(mainWindow, loadPage) {
                 {
                     label: 'Zone Spawn System',
                     click: () => loadPage('category2')
+                },
+                {
+                    label: 'DiscordChat log',
+                    click: () => loadPage('category3')
                 }
             ]
         },

@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const { createMenu } = require('./menu');
 
 let mainWindow;
@@ -47,4 +48,26 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', function () {
     if (process.platform !== 'darwin') app.quit();
+});
+
+// Handle open chat log request
+ipcMain.handle('open-chat-log', async () => {
+    try {
+        const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+            title: 'Open DiscordChat log',
+            properties: ['openFile'],
+            filters: [
+                { name: 'Log Files', extensions: ['log', 'txt'] },
+                { name: 'All Files', extensions: ['*'] }
+            ]
+        });
+        if (canceled || !filePaths || filePaths.length === 0) {
+            return { canceled: true };
+        }
+        const filePath = filePaths[0];
+        const content = await fs.promises.readFile(filePath, 'utf8');
+        return { canceled: false, content, filePath };
+    } catch (err) {
+        return { canceled: true, error: String(err) };
+    }
 });
