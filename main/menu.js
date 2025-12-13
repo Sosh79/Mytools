@@ -20,6 +20,10 @@ function createMenu(mainWindow, loadPage) {
                 {
                     label: 'DiscordChat log',
                     click: () => loadPage('category3')
+                },
+                {
+                    label: 'DayZ XML Generator',
+                    click: () => loadPage('category4')
                 }
             ]
         },

@@ -14,7 +14,7 @@ function createWindow() {
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.js')
         },
-        icon: path.join(__dirname, '../assets/icon.png')
+        icon: path.join(__dirname, '../assets/icon.ico')
     });
 
     // Load home page
@@ -67,6 +67,30 @@ ipcMain.handle('open-chat-log', async () => {
         const filePath = filePaths[0];
         const content = await fs.promises.readFile(filePath, 'utf8');
         return { canceled: false, content, filePath };
+    } catch (err) {
+        return { canceled: true, error: String(err) };
+    }
+});
+
+// Handle save file request
+ipcMain.handle('save-file', async (event, content, defaultName) => {
+    try {
+        const extension = defaultName.endsWith('.json') ? 'json' : (defaultName.endsWith('.xml') ? 'xml' : 'txt');
+        const filterName = extension === 'json' ? 'JSON Files' : (extension === 'xml' ? 'XML Files' : 'Text Files');
+
+        const { canceled, filePath } = await dialog.showSaveDialog(mainWindow, {
+            title: 'Save File',
+            defaultPath: defaultName || 'output.txt',
+            filters: [
+                { name: filterName, extensions: [extension] },
+                { name: 'All Files', extensions: ['*'] }
+            ]
+        });
+        if (canceled || !filePath) {
+            return { canceled: true };
+        }
+        await fs.promises.writeFile(filePath, content, 'utf8');
+        return { canceled: false, filePath };
     } catch (err) {
         return { canceled: true, error: String(err) };
     }

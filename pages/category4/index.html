@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DayZ XML Generator</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>DayZ XML Generator</h1>
+      <p class="subtitle">Generate types.xml for DayZ items from class names</p>
+    </header>
+
+    <nav class="breadcrumb">
+      <button class="btn-back" onclick="goBack()">← Back to Home</button>
+    </nav>
+
+    <main>
+      <section class="tools-section">
+        <h2>XML Generator</h2>
+
+        <div class="tool-card xml-generator">
+          <h3>Enter class names (one per line)</h3>
+
+          <div class="controls-row">
+            <textarea id="classInput" class="textarea-field" rows="12" placeholder="AK47&#10;M4A1&#10;Bandage&#10;..."></textarea>
+          </div>
+
+          <div class="settings-section">
+            <h4>Default Settings</h4>
+            <div class="settings-grid">
+              <div class="form-group">
+                <label for="nominal">Nominal</label>
+                <input type="number" id="nominal" class="input-field" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="lifetime">Lifetime (seconds)</label>
+                <input type="number" id="lifetime" class="input-field" value="3888000" min="0">
+              </div>
+              <div class="form-group">
+                <label for="restock">Restock</label>
+                <input type="number" id="restock" class="input-field" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="min">Min</label>
+                <input type="number" id="min" class="input-field" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="quantmin">Quant Min</label>
+                <input type="number" id="quantmin" class="input-field" value="-1">
+              </div>
+              <div class="form-group">
+                <label for="quantmax">Quant Max</label>
+                <input type="number" id="quantmax" class="input-field" value="-1">
+              </div>
+              <div class="form-group">
+                <label for="cost">Cost</label>
+                <input type="number" id="cost" class="input-field" value="100" min="0">
+              </div>
+            </div>
+
+            <h4>Flags</h4>
+            <div class="flags-grid">
+              <label class="checkbox-label">
+                <input type="checkbox" id="countInCargo" value="1">
+                <span>Count in Cargo</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="countInHoarder" value="1">
+                <span>Count in Hoarder</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="countInMap" value="1" checked>
+                <span>Count in Map</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="countInPlayer" value="1">
+                <span>Count in Player</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="crafted" value="1">
+                <span>Crafted</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="deloot" value="1">
+                <span>Deloot</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-secondary" onclick="openClassFile()">Open File</button>
+            <button class="btn btn-primary" onclick="generateXML()">Generate XML</button>
+            <button class="btn btn-success" onclick="saveXML()">Save XML</button>
+            <button class="btn btn-info" onclick="copyXML()">Copy XML</button>
+            <button class="btn btn-warning" onclick="clearAll()">Clear</button>
+          </div>
+
+          <div class="output-section">
+            <h4>Generated XML</h4>
+            <div class="stats" id="stats"></div>
+            <pre id="xmlOutput" class="xml-output"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../../renderer/navigation.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

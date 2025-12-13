@@ -130,8 +130,7 @@ header h1 {
 
 .btn-secondary {
   background: #e0e0e0;
-  color: #999;
-  cursor: not-allowed;
+  color: #333;
 }
 
 .result-box {
@@ -226,6 +225,16 @@ header h1 {
 .btn-success:hover {
   transform: scale(1.05);
   box-shadow: 0 5px 15px rgba(56, 239, 125, 0.4);
+}
+
+.btn-info {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.btn-info:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(0, 242, 254, 0.4);
 }
 
 .btn-warning {
