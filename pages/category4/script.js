@@ -51,6 +51,12 @@ function generateXML() {
     const crafted = document.getElementById('crafted').checked ? '1' : '0';
     const deloot = document.getElementById('deloot').checked ? '1' : '0';
 
+    // Get selected options
+    const selectedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
+    const selectedUsages = Array.from(document.querySelectorAll('.usage-checkbox:checked')).map(cb => cb.value);
+    const selectedValues = Array.from(document.querySelectorAll('.value-checkbox:checked')).map(cb => cb.value);
+    const selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
+
     // Build XML
     let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<types>\n';
 
@@ -64,6 +70,27 @@ function generateXML() {
         xml += `        <quantmax>${quantmax}</quantmax>\n`;
         xml += `        <cost>${cost}</cost>\n`;
         xml += `        <flags count_in_cargo="${countInCargo}" count_in_hoarder="${countInHoarder}" count_in_map="${countInMap}" count_in_player="${countInPlayer}" crafted="${crafted}" deloot="${deloot}" />\n`;
+
+        // Add categories
+        for (const category of selectedCategories) {
+            xml += `        <category name="${category}" />\n`;
+        }
+
+        // Add usages
+        for (const usage of selectedUsages) {
+            xml += `        <usage name="${usage}" />\n`;
+        }
+
+        // Add values
+        for (const value of selectedValues) {
+            xml += `        <value name="${value}" />\n`;
+        }
+
+        // Add tags
+        for (const tag of selectedTags) {
+            xml += `        <tag name="${tag}" />\n`;
+        }
+
         xml += `    </type>\n`;
     }
 
@@ -132,6 +159,11 @@ function clearAll() {
     document.getElementById('countInPlayer').checked = false;
     document.getElementById('crafted').checked = false;
     document.getElementById('deloot').checked = false;
+    // Uncheck all options
+    document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.usage-checkbox').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.value-checkbox').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.tag-checkbox').forEach(cb => cb.checked = false);
 }
 
 function showMessage(message, type) {
