@@ -1,6 +1,6 @@
 {
   "name": "mytools-electron-app",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Multi-page Electron application with organized structure",
   "main": "main/main.js",
   "scripts": {

@@ -1,56 +1,64 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Teleport Generator</title>
+  <title>Teleport Generator - MyTools</title>
+  <link rel="stylesheet" href="../../renderer/global.css">
   <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <h1>Teleport Generator</h1>
-      <p class="subtitle">Create teleport entry JSON configurations for your game</p>
-    </header>
+  <div id="sidebar-container"></div>
 
-    <nav class="breadcrumb">
-      <button class="btn-back" onclick="goBack()">← Back to Home</button>
-    </nav>
-
-    <main>
-      <section class="tools-section">
-        <h2>Teleport Entry Generator</h2>
-        
-        <div class="tool-card teleport-generator">
-          <h3>Teleport Entries Management</h3>
-          <p>Add multiple teleport entries to generate your configuration</p>
-          
-          <div id="teleportsContainer"></div>
-
-          <div class="button-group">
-            <button class="btn btn-add" onclick="addTeleport()">+ Add Teleport Entry</button>
-          </div>
-
-          <hr class="section-divider">
-
-          <div class="button-group">
-            <button class="btn btn-secondary" onclick="openJSONFile()">Open File</button>
-            <button class="btn btn-primary" onclick="generateJSON()">Generate JSON</button>
-            <button class="btn btn-success" onclick="saveJSON()">Save JSON</button>
-            <button class="btn btn-info" onclick="copyJSON()">Copy to Clipboard</button>
-            <button class="btn btn-warning" onclick="clearForm()">Clear All</button>
-          </div>
-
-          <div class="output-section">
-            <h4>Generated JSON:</h4>
-            <pre id="jsonOutput" class="json-output"></pre>
-          </div>
+  <div class="has-sidebar split-pane-container">
+    <!-- Left Pane: Inputs -->
+    <section class="pane input-pane">
+      <header class="pane-header">
+        <div class="header-main">
+          <h1>Teleport Generator</h1>
+          <p class="subtitle">Management and entry configuration</p>
         </div>
-      </section>
-    </main>
+        <div class="header-actions">
+          <button class="btn-toggle-preview" onclick="togglePreview()">Show/Hide Preview</button>
+          <button class="btn-premium" onclick="addTeleport()">+ Add Entry</button>
+        </div>
+      </header>
+
+      <div class="scroll-content">
+        <div id="teleportsContainer" class="entries-list"></div>
+      </div>
+
+      <footer class="pane-footer">
+        <div class="button-group-unified">
+          <button class="btn-secondary-custom" onclick="openJSONFile()">Open</button>
+          <button class="btn-warning-custom" onclick="clearForm()">Clear All</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Right Pane: Preview & Actions -->
+    <section class="pane output-pane glass">
+      <header class="pane-header">
+        <div class="header-main">
+          <h2>JSON Preview</h2>
+        </div>
+        <div class="header-actions">
+          <button class="btn-premium btn-neon" onclick="copyJSON()">Copy Code</button>
+          <button class="btn-premium" onclick="saveJSON()">Save File</button>
+        </div>
+      </header>
+
+      <div class="code-wrapper scroll-content">
+        <pre id="jsonOutput" class="json-code"></pre>
+      </div>
+    </section>
   </div>
 
   <script src="../../renderer/navigation.js"></script>
+  <script src="../../renderer/sidebar.js"></script>
   <script src="./script.js"></script>
 </body>
+
 </html>

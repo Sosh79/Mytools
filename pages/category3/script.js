@@ -1,22 +1,23 @@
-// Category 3 - DiscordChat log parser
+// Category 3: DiscordChat Log Parser Logic
 
-function goBack() {
-    navigateToPage('home');
-}
-
-function parseLog() {
+function parseLog(quiet = false) {
     const raw = document.getElementById('logInput').value || '';
     const channelFilter = document.getElementById('channelFilter').value;
     const senderFilter = (document.getElementById('senderFilter').value || '').toLowerCase();
 
-    const lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
+    if (!raw.trim()) {
+        renderResults([]);
+        return;
+    }
 
+    const lines = raw.split(/\r?\n/).filter(l => l.trim().length > 0);
     const regex = /^\[(?<datetime>\d{2}\.\d{2}\.\d{4}\s+\d{2}:\d{2}:\d{2})\]:\s*\[(?<channel>Global|Direct)\]\s+(?<sender>[^:]+):\s*(?<message>.*)$/;
 
     const results = [];
     for (const line of lines) {
         const m = line.match(regex);
         if (!m) continue;
+
         const { datetime, channel } = m.groups;
         const sender = m.groups.sender.trim();
         const message = m.groups.message || '';
@@ -27,9 +28,8 @@ function parseLog() {
         results.push({ time: datetime, channel, sender, message });
     }
 
-    // Sort by time so newest is on top (oldest at bottom)
+    // Sort: newest first
     const toDate = (s) => {
-        // s format: dd.MM.yyyy HH:mm:ss
         const [datePart, timePart] = s.split(' ');
         const [dd, MM, yyyy] = datePart.split('.').map(Number);
         const [HH, mm, ss] = timePart.split(':').map(Number);
@@ -38,103 +38,92 @@ function parseLog() {
     results.sort((a, b) => toDate(b.time) - toDate(a.time));
 
     renderResults(results);
+
+    if (!quiet && results.length > 0) {
+        showMessage(`Parsed ${results.length} entries`, 'success');
+    }
 }
 
 async function openLogFile() {
     try {
         if (!window.electronAPI || !window.electronAPI.openChatLog) {
-            showMessage('Open File is not available in this build.', 'error');
+            showMessage('Open API not available.', 'error');
             return;
         }
         const result = await window.electronAPI.openChatLog();
         if (!result || result.canceled) return;
-        if (result.error) {
-            showMessage('Failed to open file: ' + result.error, 'error');
-            return;
-        }
-        const textarea = document.getElementById('logInput');
-        textarea.value = result.content || '';
-        parseLog();
-        const name = (result.filePath || '').split(/[/\\]/).pop() || 'log file';
-        showMessage('Loaded ' + name, 'success');
+
+        document.getElementById('logInput').value = result.content || '';
+        parseLog(true);
+
+        const filename = (result.filePath || '').split(/[/\\]/).pop();
+        showMessage(`Imported ${filename}`, 'success');
     } catch (err) {
-        showMessage('Error: ' + err, 'error');
+        showMessage('Import failed: ' + err.message, 'error');
     }
 }
 
 function renderResults(items) {
     const tbody = document.getElementById('resultsBody');
+    const statsEl = document.getElementById('stats');
+
     tbody.innerHTML = '';
 
-    for (const item of items) {
-        const tr = document.createElement('tr');
-
-        const tdTime = document.createElement('td');
-        tdTime.textContent = item.time;
-
-        const tdChannel = document.createElement('td');
-        const span = document.createElement('span');
-        span.className = `channel-badge channel-${item.channel}`;
-        span.textContent = item.channel;
-        tdChannel.appendChild(span);
-
-        const tdSender = document.createElement('td');
-        tdSender.textContent = item.sender;
-
-        const tdMsg = document.createElement('td');
-        tdMsg.textContent = item.message;
-
-        tr.appendChild(tdTime);
-        tr.appendChild(tdChannel);
-        tr.appendChild(tdSender);
-        tr.appendChild(tdMsg);
-
-        tbody.appendChild(tr);
+    if (items.length === 0) {
+        statsEl.textContent = '0 entries found';
+        return;
     }
 
-    const stats = document.getElementById('stats');
-    const total = items.length;
+    items.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${item.time}</td>
+            <td><span class="channel-badge channel-${item.channel}">${item.channel}</span></td>
+            <td><strong>${item.sender}</strong></td>
+            <td>${item.message}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
     const globals = items.filter(i => i.channel === 'Global').length;
     const directs = items.filter(i => i.channel === 'Direct').length;
-    stats.textContent = `Total: ${total} | Global: ${globals} | Direct: ${directs}`;
+    statsEl.textContent = `${items.length} entries (Global: ${globals}, Direct: ${directs})`;
 }
 
 function copyTable() {
-    // Copy the rendered results as TSV
     const rows = [['Time', 'Channel', 'Sender', 'Message']];
     document.querySelectorAll('#resultsBody tr').forEach(tr => {
         const cols = Array.from(tr.querySelectorAll('td')).map(td => td.innerText.replace(/\t|\n/g, ' '));
         rows.push(cols);
     });
+
+    if (rows.length <= 1) {
+        showMessage('No results to copy.', 'error');
+        return;
+    }
+
     const tsv = rows.map(r => r.join('\t')).join('\n');
     navigator.clipboard.writeText(tsv).then(() => {
-        showMessage('Results copied to clipboard!', 'success');
-    }).catch(err => showMessage('Failed to copy: ' + err, 'error'));
+        showMessage('Table copied to clipboard!', 'success');
+    });
 }
 
 function clearAll() {
     document.getElementById('logInput').value = '';
     document.getElementById('senderFilter').value = '';
     document.getElementById('channelFilter').value = 'all';
-    document.getElementById('resultsBody').innerHTML = '';
-    document.getElementById('stats').textContent = '';
+    renderResults([]);
+    showMessage('Log cleared', 'success');
 }
-
-// Quick demo fill for testing
-document.addEventListener('DOMContentLoaded', () => {
-    // Optionally preload sample from description if needed.
-});
 
 function showMessage(message, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message message-${type}`;
     messageDiv.textContent = message;
-
-    const container = document.querySelector('.container');
-    container.insertBefore(messageDiv, container.firstChild);
+    document.body.appendChild(messageDiv);
 
     setTimeout(() => {
         messageDiv.style.opacity = '0';
         setTimeout(() => messageDiv.remove(), 300);
-    }, 3000);
+    }, 2500);
 }

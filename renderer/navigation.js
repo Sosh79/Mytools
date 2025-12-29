@@ -7,6 +7,13 @@ function navigateToPage(pageName) {
     }
 }
 
+function togglePreview() {
+    const container = document.querySelector('.split-pane-container');
+    if (container) {
+        container.classList.toggle('preview-hidden');
+    }
+}
+
 // Export function for use in pages
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { navigateToPage };

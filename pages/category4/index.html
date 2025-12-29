@@ -1,210 +1,203 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DayZ XML Generator</title>
+  <title>DayZ XML Generator - MyTools</title>
+  <link rel="stylesheet" href="../../renderer/global.css">
   <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <h1>DayZ XML Generator</h1>
-      <p class="subtitle">Generate types.xml for DayZ items from class names</p>
-    </header>
+  <div id="sidebar-container"></div>
 
-    <nav class="breadcrumb">
-      <button class="btn-back" onclick="goBack()">← Back to Home</button>
-    </nav>
+  <div class="has-sidebar split-pane-container">
+    <!-- Left Pane: Inputs -->
+    <section class="pane input-pane">
+      <header class="pane-header">
+        <div class="header-main">
+          <h1>XML Generator</h1>
+          <p class="subtitle">Bulk types.xml generator</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-toggle-preview" onclick="togglePreview()">Show/Hide Preview</button>
+          <button class="btn-premium" onclick="openClassFile()">Open File</button>
+        </div>
+      </header>
 
-    <main>
-      <section class="tools-section">
-        <h2>XML Generator</h2>
+      <div class="scroll-content">
+        <div class="form-group full-width">
+          <label>Class Names (one per line)</label>
+          <textarea id="classInput" class="textarea-field" rows="8" placeholder="AK47&#10;M4A1&#10;Bandage..."
+            oninput="generateXML(true)"></textarea>
+        </div>
 
-        <div class="tool-card xml-generator">
-          <h3>Enter class names (one per line)</h3>
-
-          <div class="controls-row">
-            <textarea id="classInput" class="textarea-field" rows="12" placeholder="AK47&#10;M4A1&#10;Bandage&#10;..."></textarea>
+        <div class="divider-text">DEFAULT SETTINGS</div>
+        <div class="form-grid" oninput="generateXML(true)">
+          <div class="form-group">
+            <label>Nominal</label>
+            <input type="number" id="nominal" class="input-field" value="0" min="0">
           </div>
-
-          <div class="settings-section">
-            <h4>Default Settings</h4>
-            <div class="settings-grid">
-              <div class="form-group">
-                <label for="nominal">Nominal</label>
-                <input type="number" id="nominal" class="input-field" value="0" min="0">
-              </div>
-              <div class="form-group">
-                <label for="lifetime">Lifetime (seconds)</label>
-                <input type="number" id="lifetime" class="input-field" value="3888000" min="0">
-              </div>
-              <div class="form-group">
-                <label for="restock">Restock</label>
-                <input type="number" id="restock" class="input-field" value="0" min="0">
-              </div>
-              <div class="form-group">
-                <label for="min">Min</label>
-                <input type="number" id="min" class="input-field" value="0" min="0">
-              </div>
-              <div class="form-group">
-                <label for="quantmin">Quant Min</label>
-                <input type="number" id="quantmin" class="input-field" value="-1">
-              </div>
-              <div class="form-group">
-                <label for="quantmax">Quant Max</label>
-                <input type="number" id="quantmax" class="input-field" value="-1">
-              </div>
-              <div class="form-group">
-                <label for="cost">Cost</label>
-                <input type="number" id="cost" class="input-field" value="100" min="0">
-              </div>
-            </div>
-
-            <h4>Flags</h4>
-            <div class="flags-grid">
-              <label class="checkbox-label">
-                <input type="checkbox" id="countInCargo" value="1">
-                <span>Count in Cargo</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="countInHoarder" value="1">
-                <span>Count in Hoarder</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="countInMap" value="1" checked>
-                <span>Count in Map</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="countInPlayer" value="1">
-                <span>Count in Player</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="crafted" value="1">
-                <span>Crafted</span>
-              </label>
-              <label class="checkbox-label">
-                <input type="checkbox" id="deloot" value="1">
-                <span>Deloot</span>
-              </label>
-            </div>
-
-            <h4>Category</h4>
-            <div class="options-grid">
-              <label class="option-label">
-                <input type="checkbox" class="category-checkbox" value="clothes">
-                <span>clothes</span>
-              </label>
-              <label class="option-label">
-                <input type="checkbox" class="category-checkbox" value="tools">
-                <span>tools</span>
-              </label>
-              <label class="option-label">
-                <input type="checkbox" class="category-checkbox" value="weapons">
-                <span>weapons</span>
-              </label>
-              <label class="option-label">
-                <input type="checkbox" class="category-checkbox" value="containers">
-                <span>containers</span>
-              </label>
-              <label class="option-label">
-                <input type="checkbox" class="category-checkbox" value="food">
-                <span>food</span>
-              </label>
-            </div>
-
-            <div class="options-container">
-              <div class="options-section">
-                <h4>Usage</h4>
-                <div class="options-column">
-                  <label class="option-label">
-                    <input type="checkbox" class="usage-checkbox" value="Industrial">
-                    <span>Industrial</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="usage-checkbox" value="Farm">
-                    <span>Farm</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="usage-checkbox" value="Military">
-                    <span>Military</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="usage-checkbox" value="Medic">
-                    <span>Medic</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="usage-checkbox" value="Town">
-                    <span>Town</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="usage-checkbox" value="Village">
-                    <span>Village</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="usage-checkbox" value="Hunting">
-                    <span>Hunting</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="options-section">
-                <h4>Value</h4>
-                <div class="options-column">
-                  <label class="option-label">
-                    <input type="checkbox" class="value-checkbox" value="Tier1">
-                    <span>Tier1</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="value-checkbox" value="Tier2">
-                    <span>Tier2</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="value-checkbox" value="Tier3">
-                    <span>Tier3</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="value-checkbox" value="Tier4">
-                    <span>Tier4</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="options-section">
-                <h4>Tag</h4>
-                <div class="options-column">
-                  <label class="option-label">
-                    <input type="checkbox" class="tag-checkbox" value="floor">
-                    <span>floor</span>
-                  </label>
-                  <label class="option-label">
-                    <input type="checkbox" class="tag-checkbox" value="shelves">
-                    <span>shelves</span>
-                  </label>
-                </div>
-              </div>
-            </div>
+          <div class="form-group">
+            <label>Lifetime</label>
+            <input type="number" id="lifetime" class="input-field" value="3888000" min="0">
           </div>
-
-          <div class="button-group">
-            <button class="btn btn-secondary" onclick="openClassFile()">Open File</button>
-            <button class="btn btn-primary" onclick="generateXML()">Generate XML</button>
-            <button class="btn btn-success" onclick="saveXML()">Save XML</button>
-            <button class="btn btn-info" onclick="copyXML()">Copy XML</button>
-            <button class="btn btn-warning" onclick="clearAll()">Clear</button>
+          <div class="form-group">
+            <label>Restock</label>
+            <input type="number" id="restock" class="input-field" value="0" min="0">
           </div>
-
-          <div class="output-section">
-            <h4>Generated XML</h4>
-            <div class="stats" id="stats"></div>
-            <pre id="xmlOutput" class="xml-output"></pre>
+          <div class="form-group">
+            <label>Min</label>
+            <input type="number" id="min" class="input-field" value="0" min="0">
+          </div>
+          <div class="form-group">
+            <label>Quant Min</label>
+            <input type="number" id="quantmin" class="input-field" value="-1">
+          </div>
+          <div class="form-group">
+            <label>Quant Max</label>
+            <input type="number" id="quantmax" class="input-field" value="-1">
+          </div>
+          <div class="form-group full-width">
+            <label>Cost</label>
+            <input type="number" id="cost" class="input-field" value="100" min="0">
           </div>
         </div>
-      </section>
-    </main>
+
+        <div class="divider-text">FLAGS</div>
+        <div class="flags-grid" oninput="generateXML(true)">
+          <label class="checkbox-container">
+            <input type="checkbox" id="countInCargo">
+            <span class="checkmark"></span>
+            <span class="label-text">Cargo</span>
+          </label>
+          <label class="checkbox-container">
+            <input type="checkbox" id="countInHoarder">
+            <span class="checkmark"></span>
+            <span class="label-text">Hoarder</span>
+          </label>
+          <label class="checkbox-container">
+            <input type="checkbox" id="countInMap" checked>
+            <span class="checkmark"></span>
+            <span class="label-text">Map</span>
+          </label>
+          <label class="checkbox-container">
+            <input type="checkbox" id="countInPlayer">
+            <span class="checkmark"></span>
+            <span class="label-text">Player</span>
+          </label>
+          <label class="checkbox-container">
+            <input type="checkbox" id="crafted">
+            <span class="checkmark"></span>
+            <span class="label-text">Crafted</span>
+          </label>
+          <label class="checkbox-container">
+            <input type="checkbox" id="deloot">
+            <span class="checkmark"></span>
+            <span class="label-text">Deloot</span>
+          </label>
+        </div>
+
+        <div class="divider-text">CATEGORY</div>
+        <div class="options-grid" oninput="generateXML(true)">
+          <label class="chip-container">
+            <input type="checkbox" class="category-checkbox" value="clothes">
+            <span class="chip">Clothes</span>
+          </label>
+          <label class="chip-container">
+            <input type="checkbox" class="category-checkbox" value="tools">
+            <span class="chip">Tools</span>
+          </label>
+          <label class="chip-container">
+            <input type="checkbox" class="category-checkbox" value="weapons">
+            <span class="chip">Weapons</span>
+          </label>
+          <label class="chip-container">
+            <input type="checkbox" class="category-checkbox" value="containers">
+            <span class="chip">Containers</span>
+          </label>
+          <label class="chip-container">
+            <input type="checkbox" class="category-checkbox" value="food">
+            <span class="chip">Food</span>
+          </label>
+        </div>
+
+        <div class="divider-text">USAGE / VALUE / TAG</div>
+        <div class="multi-select-columns" oninput="generateXML(true)">
+          <div class="select-col">
+            <label>Usage</label>
+            <div class="col-list">
+              <label class="mini-checkbox"><input type="checkbox" class="usage-checkbox"
+                  value="Industrial"><span>Industrial</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="usage-checkbox"
+                  value="Farm"><span>Farm</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="usage-checkbox"
+                  value="Military"><span>Military</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="usage-checkbox"
+                  value="Medic"><span>Medic</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="usage-checkbox"
+                  value="Town"><span>Town</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="usage-checkbox"
+                  value="Village"><span>Village</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="usage-checkbox"
+                  value="Hunting"><span>Hunting</span></label>
+            </div>
+          </div>
+          <div class="select-col">
+            <label>Value</label>
+            <div class="col-list">
+              <label class="mini-checkbox"><input type="checkbox" class="value-checkbox" value="Tier1"><span>Tier
+                  1</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="value-checkbox" value="Tier2"><span>Tier
+                  2</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="value-checkbox" value="Tier3"><span>Tier
+                  3</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="value-checkbox" value="Tier4"><span>Tier
+                  4</span></label>
+            </div>
+          </div>
+          <div class="select-col">
+            <label>Tag</label>
+            <div class="col-list">
+              <label class="mini-checkbox"><input type="checkbox" class="tag-checkbox"
+                  value="floor"><span>Floor</span></label>
+              <label class="mini-checkbox"><input type="checkbox" class="tag-checkbox"
+                  value="shelves"><span>Shelves</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="pane-footer">
+        <div class="button-group-unified">
+          <button class="btn-warning-custom" onclick="clearAll()">Clear All</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Right Pane: Output -->
+    <section class="pane output-pane xml-preview">
+      <header class="pane-header">
+        <div class="header-main">
+          <h2>XML Preview</h2>
+          <div id="stats" class="subtitle stats-badge">0 items generated</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-secondary-custom" onclick="copyXML()">Copy</button>
+          <button class="btn-premium btn-neon" onclick="saveXML()">Save types.xml</button>
+        </div>
+      </header>
+
+      <div class="scroll-content code-wrapper">
+        <pre id="xmlOutput" class="xml-code"></pre>
+      </div>
+    </section>
   </div>
 
   <script src="../../renderer/navigation.js"></script>
+  <script src="../../renderer/sidebar.js"></script>
   <script src="./script.js"></script>
 </body>
+
 </html>

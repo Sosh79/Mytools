@@ -1,90 +1,100 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zone Spawn System Generator</title>
+  <title>Zone Spawn System - MyTools</title>
+  <link rel="stylesheet" href="../../renderer/global.css">
   <link rel="stylesheet" href="./styles.css">
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <h1>Zone Spawn System Generator</h1>
-      <p class="subtitle">Create spawn zone configurations for your game server</p>
-    </header>
+  <div id="sidebar-container"></div>
 
-    <nav class="breadcrumb">
-      <button class="btn-back" onclick="goBack()">← Back to Home</button>
-    </nav>
+  <div class="has-sidebar split-pane-container">
+    <!-- Left Pane: Inputs -->
+    <section class="pane input-pane">
+      <header class="pane-header">
+        <div class="header-main">
+          <h1>Zone Spawn System</h1>
+          <p class="subtitle">Global settings and zone management</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-toggle-preview" onclick="togglePreview()">Show/Hide Preview</button>
+          <button class="btn-premium" onclick="addZone()">+ Add Zone</button>
+        </div>
+      </header>
 
-    <main>
-      <section class="tools-section">
-        <h2>Spawn Configuration Generator</h2>
-        
-        <div class="tool-card spawn-generator">
-          <h3>Global Settings</h3>
-          
-          <div class="form-grid">
+      <div class="scroll-content">
+        <!-- Global Settings Section -->
+        <div class="config-section glass-card">
+          <div class="section-header-compact">
+            <span class="icon">⚙️</span>
+            <h4>Global Configuration</h4>
+          </div>
+          <div class="form-grid" oninput="generateJSON(true)">
             <div class="form-group">
-              <label for="systemEnabled">System Enabled</label>
+              <label>System Enabled</label>
               <select id="systemEnabled" class="input-field">
-                <option value="1">Enabled (1)</option>
-                <option value="0">Disabled (0)</option>
+                <option value="1">Enabled</option>
+                <option value="0">Disabled</option>
               </select>
             </div>
-
             <div class="form-group">
-              <label for="checkInterval">Check Interval (seconds)</label>
+              <label>Check Interval (sec)</label>
               <input type="number" id="checkInterval" class="input-field" value="7" min="1">
             </div>
-
             <div class="form-group">
-              <label for="maxEntities">Max Entities Per Zone</label>
+              <label>Max Entities</label>
               <input type="number" id="maxEntities" class="input-field" value="100" min="1">
             </div>
-
             <div class="form-group">
-              <label for="entityLifetime">Entity Lifetime (seconds)</label>
+              <label>Entity Lifetime (sec)</label>
               <input type="number" id="entityLifetime" class="input-field" value="600" min="0">
             </div>
-
-            <div class="form-group">
-              <label for="minSpawnDistance">Min Spawn Distance From Player</label>
+            <div class="form-group full-width">
+              <label>Min Spawn Distance From Player</label>
               <input type="number" id="minSpawnDistance" class="input-field" value="100" min="0">
             </div>
           </div>
-
-          <hr class="section-divider">
-
-          <h3>Zones Management</h3>
-          <p class="info-text">Add and configure spawn zones. Each zone can have multiple spawn points.</p>
-          
-          <div id="zonesContainer"></div>
-
-          <div class="button-group">
-            <button class="btn btn-add" onclick="addZone()">+ Add Zone</button>
-          </div>
-
-          <hr class="section-divider">
-
-          <div class="button-group">
-            <button class="btn btn-secondary" onclick="openJSONFile()">Open File</button>
-            <button class="btn btn-primary" onclick="generateJSON()">Generate JSON</button>
-            <button class="btn btn-success" onclick="saveJSON()">Save JSON</button>
-            <button class="btn btn-info" onclick="copyJSON()">Copy to Clipboard</button>
-            <button class="btn btn-warning" onclick="clearAll()">Clear All</button>
-          </div>
-
-          <div class="output-section">
-            <h4>Generated JSON:</h4>
-            <pre id="jsonOutput" class="json-output"></pre>
-          </div>
         </div>
-      </section>
-    </main>
+
+        <div class="divider-text">ZONES</div>
+
+        <!-- Zones Container -->
+        <div id="zonesContainer" class="entries-list"></div>
+      </div>
+
+      <footer class="pane-footer">
+        <div class="button-group-unified">
+          <button class="btn-secondary-custom" onclick="openJSONFile()">Open</button>
+          <button class="btn-warning-custom" onclick="clearAll()">Clear All</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Right Pane: Preview -->
+    <section class="pane output-pane glass">
+      <header class="pane-header">
+        <div class="header-main">
+          <h2>JSON Preview</h2>
+        </div>
+        <div class="header-actions">
+          <button class="btn-premium btn-neon" onclick="copyJSON()">Copy Code</button>
+          <button class="btn-premium" onclick="saveJSON()">Save File</button>
+        </div>
+      </header>
+
+      <div class="code-wrapper scroll-content">
+        <pre id="jsonOutput" class="json-code"></pre>
+      </div>
+    </section>
   </div>
 
   <script src="../../renderer/navigation.js"></script>
+  <script src="../../renderer/sidebar.js"></script>
   <script src="./script.js"></script>
 </body>
+
 </html>

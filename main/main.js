@@ -5,6 +5,9 @@ const { createMenu } = require('./menu');
 
 let mainWindow;
 
+// Disable hardware acceleration to prevent GPU crashes on some systems
+app.disableHardwareAcceleration();
+
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1200,
@@ -16,6 +19,8 @@ function createWindow() {
         },
         icon: path.join(__dirname, '../assets/icon.ico')
     });
+
+    mainWindow.maximize();
 
     // Load home page
     loadPage('home');

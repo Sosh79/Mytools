@@ -1,168 +1,214 @@
-// Category 2 page logic - Zone Spawn System Generator
-
-function goBack() {
-    navigateToPage('home');
-}
+// Category 2: Zone Spawn System Logic
 
 let zoneCounter = 0;
 let zones = [];
 
-// Add a new zone
-function addZone() {
+/**
+ * Add a new spawn zone card
+ */
+function addZone(zoneData = null) {
     const zoneId = zoneCounter++;
-    const zoneData = {
+    const zoneObj = {
         id: zoneId,
         spawnPoints: []
     };
-    zones.push(zoneData);
+    zones.push(zoneObj);
 
     const zonesContainer = document.getElementById('zonesContainer');
     const zoneDiv = document.createElement('div');
-    zoneDiv.className = 'zone-card';
+    zoneDiv.className = 'zone-card glass-card';
     zoneDiv.id = `zone-${zoneId}`;
+
+    const data = zoneData || {
+        name: `Pulkovo_${zoneId + 1}`,
+        enabled: 1,
+        position: "4896.86 319.26 5683.65",
+        triggerRadius: 150,
+        spawnChance: 1.0,
+        despawnOnExit: 1,
+        despawnDistance: 150,
+        respawnCooldown: 300,
+        spawnPoints: []
+    };
 
     zoneDiv.innerHTML = `
         <div class="zone-header">
-            <h4>Zone ${zoneId + 1}</h4>
+            <h4><span class="nav-icon">🛡️</span> Zone: ${data.name}</h4>
             <button class="btn-remove" onclick="removeZone(${zoneId})">✕ Remove Zone</button>
         </div>
         
-        <div class="form-grid">
+        <div class="form-grid" oninput="generateJSON(true)">
             <div class="form-group">
                 <label>Zone Name</label>
-                <input type="text" id="zoneName-${zoneId}" class="input-field" placeholder="Pulkovo" value="Zone_${zoneId + 1}">
+                <input type="text" id="zoneName-${zoneId}" class="input-field" value="${data.name}">
             </div>
             
             <div class="form-group">
-                <label>Enabled</label>
+                <label>Status</label>
                 <select id="zoneEnabled-${zoneId}" class="input-field">
-                    <option value="1">Enabled (1)</option>
-                    <option value="0">Disabled (0)</option>
+                    <option value="1" ${data.enabled == 1 ? 'selected' : ''}>Enabled</option>
+                    <option value="0" ${data.enabled == 0 ? 'selected' : ''}>Disabled</option>
                 </select>
             </div>
             
             <div class="form-group full-width">
-                <label>Position (X Y Z)</label>
-                <input type="text" id="zonePosition-${zoneId}" class="input-field" placeholder="4896.864746 319.264923 5683.656250" value="0 0 0">
+                <label>Center Position (X Y Z)</label>
+                <input type="text" id="zonePosition-${zoneId}" class="input-field" value="${data.position}">
             </div>
             
             <div class="form-group">
                 <label>Trigger Radius</label>
-                <input type="number" id="zoneTriggerRadius-${zoneId}" class="input-field" value="150" step="any">
+                <input type="number" id="zoneTriggerRadius-${zoneId}" class="input-field" value="${data.triggerRadius}" step="any">
             </div>
             
             <div class="form-group">
                 <label>Spawn Chance (0-1)</label>
-                <input type="number" id="zoneSpawnChance-${zoneId}" class="input-field" value="1" min="0" max="1" step="0.1">
+                <input type="number" id="zoneSpawnChance-${zoneId}" class="input-field" value="${data.spawnChance}" min="0" max="1" step="0.1">
             </div>
             
             <div class="form-group">
                 <label>Despawn On Exit</label>
                 <select id="zoneDespawnOnExit-${zoneId}" class="input-field">
-                    <option value="1">Yes (1)</option>
-                    <option value="0">No (0)</option>
+                    <option value="1" ${data.despawnOnExit == 1 ? 'selected' : ''}>Yes</option>
+                    <option value="0" ${data.despawnOnExit == 0 ? 'selected' : ''}>No</option>
                 </select>
             </div>
             
             <div class="form-group">
                 <label>Despawn Distance</label>
-                <input type="number" id="zoneDespawnDistance-${zoneId}" class="input-field" value="150" step="any">
+                <input type="number" id="zoneDespawnDistance-${zoneId}" class="input-field" value="${data.despawnDistance}" step="any">
             </div>
             
-            <div class="form-group">
+            <div class="form-group full-width">
                 <label>Respawn Cooldown (seconds)</label>
-                <input type="number" id="zoneRespawnCooldown-${zoneId}" class="input-field" value="300" min="0">
+                <input type="number" id="zoneRespawnCooldown-${zoneId}" class="input-field" value="${data.respawnCooldown}" min="0">
             </div>
         </div>
         
         <div class="spawn-points-section">
-            <h5>Spawn Points</h5>
-            <div id="spawnPointsContainer-${zoneId}"></div>
-            <button class="btn btn-secondary" onclick="addSpawnPoint(${zoneId})">+ Add Spawn Point</button>
+            <div class="section-header-compact">
+                <span class="icon">📍</span>
+                <h5>Spawn Points</h5>
+            </div>
+            <div id="spawnPointsContainer-${zoneId}" class="entries-list"></div>
+            <div style="margin-top: 1rem;">
+                <button class="btn-premium" style="padding: 0.5rem 1rem; font-size: 0.8rem;" onclick="addSpawnPoint(${zoneId})">+ Add Point</button>
+            </div>
         </div>
     `;
 
     zonesContainer.appendChild(zoneDiv);
-    showMessage('Zone added successfully!', 'success');
-}
 
-// Remove a zone
-function removeZone(zoneId) {
-    const zoneElement = document.getElementById(`zone-${zoneId}`);
-    if (zoneElement) {
-        zoneElement.remove();
-        zones = zones.filter(z => z.id !== zoneId);
-        showMessage('Zone removed!', 'success');
+    // Load existing spawn points if any
+    if (data.spawnPoints && data.spawnPoints.length > 0) {
+        data.spawnPoints.forEach(sp => addSpawnPoint(zoneId, sp));
+    } else if (!zoneData) {
+        // Add one default if creating new
+        addSpawnPoint(zoneId);
+    }
+
+    if (!zoneData) {
+        generateJSON(true);
     }
 }
 
-// Add spawn point to a zone
-function addSpawnPoint(zoneId) {
+/**
+ * Remove a zone
+ */
+function removeZone(zoneId) {
+    const element = document.getElementById(`zone-${zoneId}`);
+    if (element) {
+        element.remove();
+        zones = zones.filter(z => z.id !== zoneId);
+        generateJSON(true);
+    }
+}
+
+/**
+ * Add a spawn point to a specific zone
+ */
+function addSpawnPoint(zoneId, spData = null) {
     const zone = zones.find(z => z.id === zoneId);
     if (!zone) return;
 
-    const spawnPointId = zone.spawnPoints.length;
-    zone.spawnPoints.push(spawnPointId);
+    const spId = zone.spawnPoints.length;
+    zone.spawnPoints.push(spId);
 
     const container = document.getElementById(`spawnPointsContainer-${zoneId}`);
-    const spawnPointDiv = document.createElement('div');
-    spawnPointDiv.className = 'spawn-point-card';
-    spawnPointDiv.id = `spawnPoint-${zoneId}-${spawnPointId}`;
+    const spDiv = document.createElement('div');
+    spDiv.className = 'spawn-point-card glass';
+    spDiv.id = `spawnPoint-${zoneId}-${spId}`;
 
-    spawnPointDiv.innerHTML = `
+    const data = spData || {
+        position: "0 0 0",
+        radius: 5,
+        tierIds: [1],
+        entities: 7,
+        useFixedHeight: 0
+    };
+
+    spDiv.innerHTML = `
         <div class="spawn-point-header">
-            <strong>Spawn Point ${spawnPointId + 1}</strong>
-            <button class="btn-remove-small" onclick="removeSpawnPoint(${zoneId}, ${spawnPointId})">✕</button>
+            <span>POINT #${spId + 1}</span>
+            <button class="btn-remove btn-remove-small" onclick="removeSpawnPoint(${zoneId}, ${spId})">✕</button>
         </div>
         
-        <div class="form-grid-compact">
-            <div class="form-group">
+        <div class="form-grid" oninput="generateJSON(true)">
+            <div class="form-group full-width">
                 <label>Position (X Y Z)</label>
-                <input type="text" id="spPosition-${zoneId}-${spawnPointId}" class="input-field" placeholder="4884.697266 319.066681 5694.229004" value="0 0 0">
+                <input type="text" id="spPosition-${zoneId}-${spId}" class="input-field" value="${data.position}">
             </div>
             
             <div class="form-group">
                 <label>Radius</label>
-                <input type="number" id="spRadius-${zoneId}-${spawnPointId}" class="input-field" value="5" step="any">
-            </div>
-            
-            <div class="form-group">
-                <label>Tier IDs (comma separated)</label>
-                <input type="text" id="spTierIds-${zoneId}-${spawnPointId}" class="input-field" placeholder="1,2,3" value="1">
+                <input type="number" id="spRadius-${zoneId}-${spId}" class="input-field" value="${data.radius}" step="any">
             </div>
             
             <div class="form-group">
                 <label>Entities Count</label>
-                <input type="number" id="spEntities-${zoneId}-${spawnPointId}" class="input-field" value="7" min="1">
+                <input type="number" id="spEntities-${zoneId}-${spId}" class="input-field" value="${data.entities}" min="1">
             </div>
             
             <div class="form-group">
-                <label>Use Fixed Height</label>
-                <select id="spFixedHeight-${zoneId}-${spawnPointId}" class="input-field">
-                    <option value="0">No (0)</option>
-                    <option value="1">Yes (1)</option>
+                <label>Tier IDs (comma separated)</label>
+                <input type="text" id="spTierIds-${zoneId}-${spId}" class="input-field" value="${Array.isArray(data.tierIds) ? data.tierIds.join(',') : data.tierIds}">
+            </div>
+            
+            <div class="form-group">
+                <label>Fixed Height</label>
+                <select id="spFixedHeight-${zoneId}-${spId}" class="input-field">
+                    <option value="0" ${data.useFixedHeight == 0 ? 'selected' : ''}>No</option>
+                    <option value="1" ${data.useFixedHeight == 1 ? 'selected' : ''}>Yes</option>
                 </select>
             </div>
         </div>
     `;
 
-    container.appendChild(spawnPointDiv);
+    container.appendChild(spDiv);
+    if (!spData) {
+        generateJSON(true);
+    }
 }
 
-// Remove spawn point
-function removeSpawnPoint(zoneId, spawnPointId) {
-    const element = document.getElementById(`spawnPoint-${zoneId}-${spawnPointId}`);
+/**
+ * Remove a spawn point
+ */
+function removeSpawnPoint(zoneId, spId) {
+    const element = document.getElementById(`spawnPoint-${zoneId}-${spId}`);
     if (element) {
         element.remove();
         const zone = zones.find(z => z.id === zoneId);
         if (zone) {
-            zone.spawnPoints = zone.spawnPoints.filter(sp => sp !== spawnPointId);
+            zone.spawnPoints = zone.spawnPoints.filter(id => id !== spId);
         }
+        generateJSON(true);
     }
 }
 
-// Generate JSON
-function generateJSON() {
+/**
+ * Generate JSON from current state
+ */
+function generateJSON(quiet = false) {
     const config = {
         globalSettings: {
             systemEnabled: parseInt(document.getElementById('systemEnabled').value),
@@ -175,23 +221,22 @@ function generateJSON() {
     };
 
     zones.forEach(zone => {
-        const zoneElement = document.getElementById(`zone-${zone.id}`);
-        if (!zoneElement) return;
+        const zoneEl = document.getElementById(`zone-${zone.id}`);
+        if (!zoneEl) return;
 
         const spawnPoints = [];
         zone.spawnPoints.forEach(spId => {
-            const spElement = document.getElementById(`spawnPoint-${zone.id}-${spId}`);
-            if (!spElement) return;
+            const spEl = document.getElementById(`spawnPoint-${zone.id}-${spId}`);
+            if (!spEl) return;
 
-            const position = document.getElementById(`spPosition-${zone.id}-${spId}`).value;
-            const tierIdsString = document.getElementById(`spTierIds-${zone.id}-${spId}`).value;
-            const tierIds = tierIdsString.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+            const tierIdsStr = document.getElementById(`spTierIds-${zone.id}-${spId}`).value;
+            const tierIds = tierIdsStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
 
             spawnPoints.push({
-                position: position,
-                radius: parseFloat(document.getElementById(`spRadius-${zone.id}-${spId}`).value),
+                position: document.getElementById(`spPosition-${zone.id}-${spId}`).value,
+                radius: parseFloat(document.getElementById(`spRadius-${zone.id}-${spId}`).value) || 0,
                 tierIds: tierIds,
-                entities: parseInt(document.getElementById(`spEntities-${zone.id}-${spId}`).value),
+                entities: parseInt(document.getElementById(`spEntities-${zone.id}-${spId}`).value) || 0,
                 useFixedHeight: parseInt(document.getElementById(`spFixedHeight-${zone.id}-${spId}`).value)
             });
         });
@@ -200,295 +245,128 @@ function generateJSON() {
             name: document.getElementById(`zoneName-${zone.id}`).value,
             enabled: parseInt(document.getElementById(`zoneEnabled-${zone.id}`).value),
             position: document.getElementById(`zonePosition-${zone.id}`).value,
-            triggerRadius: parseFloat(document.getElementById(`zoneTriggerRadius-${zone.id}`).value),
-            spawnChance: parseFloat(document.getElementById(`zoneSpawnChance-${zone.id}`).value),
+            triggerRadius: parseFloat(document.getElementById(`zoneTriggerRadius-${zone.id}`).value) || 0,
+            spawnChance: parseFloat(document.getElementById(`zoneSpawnChance-${zone.id}`).value) || 0,
             despawnOnExit: parseInt(document.getElementById(`zoneDespawnOnExit-${zone.id}`).value),
-            despawnDistance: parseFloat(document.getElementById(`zoneDespawnDistance-${zone.id}`).value),
-            respawnCooldown: parseInt(document.getElementById(`zoneRespawnCooldown-${zone.id}`).value),
+            despawnDistance: parseFloat(document.getElementById(`zoneDespawnDistance-${zone.id}`).value) || 0,
+            respawnCooldown: parseInt(document.getElementById(`zoneRespawnCooldown-${zone.id}`).value) || 0,
             spawnPoints: spawnPoints
         });
     });
 
-    const jsonOutput = document.getElementById('jsonOutput');
-    const formattedJSON = JSON.stringify(config, null, 2);
-    jsonOutput.textContent = formattedJSON;
+    const output = document.getElementById('jsonOutput');
+    const formatted = JSON.stringify(config, null, 2);
+    output.textContent = formatted;
 
-    showMessage('JSON generated successfully!', 'success');
+    if (!quiet) {
+        showMessage('JSON synchronized!', 'success');
+    }
 }
 
-// Copy JSON to clipboard
 async function saveJSON() {
-    const jsonOutput = document.getElementById('jsonOutput');
-    const text = jsonOutput.textContent;
+    generateJSON(true);
+    const text = document.getElementById('jsonOutput').textContent;
 
-    if (!text || text.trim() === '') {
-        showMessage('Please generate JSON first!', 'error');
+    if (!text || text === '{}') {
+        showMessage('Nothing to save.', 'error');
         return;
     }
 
     try {
         if (!window.electronAPI || !window.electronAPI.saveFile) {
-            showMessage('Save File is not available in this build.', 'error');
+            showMessage('Save API not available.', 'error');
             return;
         }
         const result = await window.electronAPI.saveFile(text, 'spawn-zones.json');
         if (!result || result.canceled) return;
         if (result.error) {
-            showMessage('Failed to save file: ' + result.error, 'error');
+            showMessage('Save failed: ' + result.error, 'error');
             return;
         }
-        showMessage('JSON saved successfully!', 'success');
+        showMessage('Configuration saved!', 'success');
     } catch (err) {
-        showMessage('Error: ' + err, 'error');
+        showMessage('Runtime error: ' + err.message, 'error');
     }
 }
 
 async function openJSONFile() {
     try {
         if (!window.electronAPI || !window.electronAPI.openChatLog) {
-            showMessage('Open File is not available in this build.', 'error');
+            showMessage('Open API not available.', 'error');
             return;
         }
         const result = await window.electronAPI.openChatLog();
         if (!result || result.canceled) return;
         if (result.error) {
-            showMessage('Failed to open file: ' + result.error, 'error');
+            showMessage('Load failed: ' + result.error, 'error');
             return;
         }
 
-        const content = result.content || '';
-        try {
-            const data = JSON.parse(content);
+        const data = JSON.parse(result.content);
 
-            // Clear existing data
-            document.getElementById('zonesContainer').innerHTML = '';
-            document.getElementById('jsonOutput').textContent = '';
-            zones = [];
-            zoneCounter = 0;
+        // Reset
+        document.getElementById('zonesContainer').innerHTML = '';
+        zones = [];
+        zoneCounter = 0;
 
-            // Load global settings if available
-            if (data.globalSettings) {
-                document.getElementById('systemEnabled').value = data.globalSettings.systemEnabled || 1;
-                document.getElementById('checkInterval').value = data.globalSettings.checkInterval || 7;
-                document.getElementById('maxEntities').value = data.globalSettings.maxEntitiesPerZone || 100;
-                document.getElementById('entityLifetime').value = data.globalSettings.entityLifetime || 600;
-                document.getElementById('minSpawnDistance').value = data.globalSettings.minSpawnDistanceFromPlayer || 100;
-            }
-
-            // Load zones if available
-            if (data.zones && Array.isArray(data.zones)) {
-                data.zones.forEach(zoneData => {
-                    const zoneId = zoneCounter++;
-                    const newZone = {
-                        id: zoneId,
-                        spawnPoints: []
-                    };
-                    zones.push(newZone);
-
-                    const zonesContainer = document.getElementById('zonesContainer');
-                    const zoneDiv = document.createElement('div');
-                    zoneDiv.className = 'zone-card';
-                    zoneDiv.id = `zone-${zoneId}`;
-
-                    zoneDiv.innerHTML = `
-                        <div class="zone-header">
-                            <h4>Zone ${zoneId + 1}</h4>
-                            <button class="btn-remove" onclick="removeZone(${zoneId})">✕ Remove Zone</button>
-                        </div>
-                        
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Zone Name</label>
-                                <input type="text" id="zoneName-${zoneId}" class="input-field" placeholder="Zone_1" value="Zone_${zoneId + 1}">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Zone Enabled</label>
-                                <select id="zoneEnabled-${zoneId}" class="input-field">
-                                    <option value="1">Enabled (1)</option>
-                                    <option value="0">Disabled (0)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group full-width">
-                                <label>Zone Position</label>
-                                <input type="text" id="zonePosition-${zoneId}" class="input-field" placeholder="0 0 0" value="0 0 0">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Trigger Radius</label>
-                                <input type="number" id="zoneTriggerRadius-${zoneId}" class="input-field" value="50" step="any">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Spawn Chance (0-1)</label>
-                                <input type="number" id="zoneSpawnChance-${zoneId}" class="input-field" value="0.5" step="0.01" min="0" max="1">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Despawn On Exit</label>
-                                <select id="zoneDespawnOnExit-${zoneId}" class="input-field">
-                                    <option value="1">Yes (1)</option>
-                                    <option value="0">No (0)</option>
-                                </select>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Despawn Distance</label>
-                                <input type="number" id="zoneDespawnDistance-${zoneId}" class="input-field" value="150" step="any">
-                            </div>
-                            
-                            <div class="form-group">
-                                <label>Respawn Cooldown (seconds)</label>
-                                <input type="number" id="zoneRespawnCooldown-${zoneId}" class="input-field" value="300" min="0">
-                            </div>
-                        </div>
-                        
-                        <div class="spawn-points-section">
-                            <h5>Spawn Points</h5>
-                            <div id="spawnPointsContainer-${zoneId}"></div>
-                            <button class="btn btn-secondary" onclick="addSpawnPoint(${zoneId})">+ Add Spawn Point</button>
-                        </div>
-                    `;
-
-                    zonesContainer.appendChild(zoneDiv);
-
-                    // Fill zone values
-                    document.getElementById(`zoneName-${zoneId}`).value = zoneData.name || `Zone_${zoneId + 1}`;
-                    document.getElementById(`zoneEnabled-${zoneId}`).value = zoneData.enabled !== undefined ? zoneData.enabled : 1;
-                    document.getElementById(`zonePosition-${zoneId}`).value = zoneData.position || '0 0 0';
-                    document.getElementById(`zoneTriggerRadius-${zoneId}`).value = zoneData.triggerRadius || 50;
-                    document.getElementById(`zoneSpawnChance-${zoneId}`).value = zoneData.spawnChance !== undefined ? zoneData.spawnChance : 0.5;
-                    document.getElementById(`zoneDespawnOnExit-${zoneId}`).value = zoneData.despawnOnExit !== undefined ? zoneData.despawnOnExit : 1;
-                    document.getElementById(`zoneDespawnDistance-${zoneId}`).value = zoneData.despawnDistance || 150;
-                    document.getElementById(`zoneRespawnCooldown-${zoneId}`).value = zoneData.respawnCooldown || 300;
-
-                    // Load spawn points for this zone
-                    if (zoneData.spawnPoints && Array.isArray(zoneData.spawnPoints)) {
-                        zoneData.spawnPoints.forEach(spData => {
-                            const spawnPointId = newZone.spawnPoints.length;
-                            newZone.spawnPoints.push(spawnPointId);
-
-                            const container = document.getElementById(`spawnPointsContainer-${zoneId}`);
-                            const spawnPointDiv = document.createElement('div');
-                            spawnPointDiv.className = 'spawn-point-card';
-                            spawnPointDiv.id = `spawnPoint-${zoneId}-${spawnPointId}`;
-
-                            spawnPointDiv.innerHTML = `
-                                <div class="spawn-point-header">
-                                    <strong>Spawn Point ${spawnPointId + 1}</strong>
-                                    <button class="btn-remove-small" onclick="removeSpawnPoint(${zoneId}, ${spawnPointId})">✕</button>
-                                </div>
-                                
-                                <div class="form-grid-compact">
-                                    <div class="form-group">
-                                        <label>Position (X Y Z)</label>
-                                        <input type="text" id="spawnPosition-${zoneId}-${spawnPointId}" class="input-field" placeholder="0 0 0" value="0 0 0">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>Entity Type</label>
-                                        <input type="text" id="spawnEntityType-${zoneId}-${spawnPointId}" class="input-field" placeholder="ZmbM_priestPopSkinny" value="ZmbM_priestPopSkinny">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>Spawn Chance (0-1)</label>
-                                        <input type="number" id="spawnChance-${zoneId}-${spawnPointId}" class="input-field" value="1.0" step="0.01" min="0" max="1">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>Min Count</label>
-                                        <input type="number" id="spawnMinCount-${zoneId}-${spawnPointId}" class="input-field" value="1" min="0">
-                                    </div>
-                                    
-                                    <div class="form-group">
-                                        <label>Max Count</label>
-                                        <input type="number" id="spawnMaxCount-${zoneId}-${spawnPointId}" class="input-field" value="3" min="0">
-                                    </div>
-                                </div>
-                            `;
-
-                            container.appendChild(spawnPointDiv);
-
-                            // Fill spawn point values
-                            document.getElementById(`spawnPosition-${zoneId}-${spawnPointId}`).value = spData.position || '0 0 0';
-                            document.getElementById(`spawnEntityType-${zoneId}-${spawnPointId}`).value = spData.entityType || 'ZmbM_priestPopSkinny';
-                            document.getElementById(`spawnChance-${zoneId}-${spawnPointId}`).value = spData.spawnChance !== undefined ? spData.spawnChance : 1.0;
-                            document.getElementById(`spawnMinCount-${zoneId}-${spawnPointId}`).value = spData.minCount || 1;
-                            document.getElementById(`spawnMaxCount-${zoneId}-${spawnPointId}`).value = spData.maxCount || 3;
-                        });
-                    }
-                });
-
-                const name = (result.filePath || '').split(/[/\\]/).pop() || 'JSON file';
-                showMessage(`Loaded ${data.zones.length} zone(s) from ${name}`, 'success');
-            } else {
-                showMessage('Invalid JSON format. Expected zones array.', 'error');
-            }
-        } catch (parseErr) {
-            showMessage('Failed to parse JSON: ' + parseErr.message, 'error');
+        if (data.globalSettings) {
+            document.getElementById('systemEnabled').value = data.globalSettings.systemEnabled !== undefined ? data.globalSettings.systemEnabled : 1;
+            document.getElementById('checkInterval').value = data.globalSettings.checkInterval || 7;
+            document.getElementById('maxEntities').value = data.globalSettings.maxEntitiesPerZone || 100;
+            document.getElementById('entityLifetime').value = data.globalSettings.entityLifetime || 600;
+            document.getElementById('minSpawnDistance').value = data.globalSettings.minSpawnDistanceFromPlayer || 100;
         }
+
+        if (data.zones && Array.isArray(data.zones)) {
+            data.zones.forEach(z => addZone(z));
+        }
+
+        generateJSON(true);
+        showMessage('Configuration imported!', 'success');
     } catch (err) {
-        showMessage('Error: ' + err, 'error');
+        showMessage('Import error: ' + err.message, 'error');
     }
 }
 
 function copyJSON() {
-    const jsonOutput = document.getElementById('jsonOutput');
-    const text = jsonOutput.textContent;
-
-    if (!text || text.trim() === '') {
-        showMessage('Please generate JSON first!', 'error');
-        return;
-    }
+    const text = document.getElementById('jsonOutput').textContent;
+    if (!text) return;
 
     navigator.clipboard.writeText(text).then(() => {
-        showMessage('JSON copied to clipboard!', 'success');
-    }).catch(err => {
-        showMessage('Failed to copy: ' + err, 'error');
+        showMessage('Copied to clipboard!', 'success');
     });
 }
 
-// Clear all
 function clearAll() {
-    if (!confirm('Are you sure you want to clear all zones?')) return;
+    if (!confirm('Discard all zones?')) return;
 
     document.getElementById('zonesContainer').innerHTML = '';
-    document.getElementById('jsonOutput').textContent = '';
     zones = [];
     zoneCounter = 0;
 
-    // Reset global settings
-    document.getElementById('systemEnabled').value = '1';
-    document.getElementById('checkInterval').value = '7';
-    document.getElementById('maxEntities').value = '100';
-    document.getElementById('entityLifetime').value = '600';
-    document.getElementById('minSpawnDistance').value = '100';
+    // Reset Globals
+    document.getElementById('systemEnabled').value = "1";
+    document.getElementById('checkInterval').value = "7";
+    document.getElementById('maxEntities').value = "100";
+    document.getElementById('entityLifetime').value = "600";
+    document.getElementById('minSpawnDistance').value = "100";
 
-    showMessage('All cleared!', 'success');
+    generateJSON(true);
+    showMessage('Workspace cleared.', 'success');
 }
 
-// Show message
 function showMessage(message, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message message-${type}`;
     messageDiv.textContent = message;
-
-    const container = document.querySelector('.container');
-    container.insertBefore(messageDiv, container.firstChild);
-
+    document.body.appendChild(messageDiv);
     setTimeout(() => {
         messageDiv.style.opacity = '0';
         setTimeout(() => messageDiv.remove(), 300);
-    }, 3000);
+    }, 2500);
 }
 
-// Page initialization
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Category 2 page loaded');
-
-    // Add one default zone
+    // Initial zone
     addZone();
-    addSpawnPoint(0);
-    addSpawnPoint(0);
 });

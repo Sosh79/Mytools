@@ -1,151 +1,120 @@
-// Category 4 - DayZ XML Generator
+// Category 4: DayZ XML Generator Logic
 
-function goBack() {
-    navigateToPage('home');
+function generateXML(quiet = false) {
+    const raw = document.getElementById('classInput').value || '';
+    const classes = raw.split(/\r?\n/).filter(l => l.trim().length > 0).map(l => l.trim());
+
+    if (classes.length === 0) {
+        document.getElementById('xmlOutput').textContent = '';
+        document.getElementById('stats').textContent = '0 items generated';
+        return;
+    }
+
+    // Get settings
+    const vals = {
+        nominal: document.getElementById('nominal').value,
+        lifetime: document.getElementById('lifetime').value,
+        restock: document.getElementById('restock').value,
+        min: document.getElementById('min').value,
+        quantmin: document.getElementById('quantmin').value,
+        quantmax: document.getElementById('quantmax').value,
+        cost: document.getElementById('cost').value
+    };
+
+    // Get flags
+    const flags = {
+        cargo: document.getElementById('countInCargo').checked ? '1' : '0',
+        hoarder: document.getElementById('countInHoarder').checked ? '1' : '0',
+        map: document.getElementById('countInMap').checked ? '1' : '0',
+        player: document.getElementById('countInPlayer').checked ? '1' : '0',
+        crafted: document.getElementById('crafted').checked ? '1' : '0',
+        deloot: document.getElementById('deloot').checked ? '1' : '0'
+    };
+
+    // Multi-selects
+    const categories = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
+    const usages = Array.from(document.querySelectorAll('.usage-checkbox:checked')).map(cb => cb.value);
+    const values = Array.from(document.querySelectorAll('.value-checkbox:checked')).map(cb => cb.value);
+    const tags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
+
+    // Build XML
+    let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<types>\n';
+
+    classes.forEach(cls => {
+        xml += `    <type name="${cls}">\n`;
+        xml += `        <nominal>${vals.nominal}</nominal>\n`;
+        xml += `        <lifetime>${vals.lifetime}</lifetime>\n`;
+        xml += `        <restock>${vals.restock}</restock>\n`;
+        xml += `        <min>${vals.min}</min>\n`;
+        xml += `        <quantmin>${vals.quantmin}</quantmin>\n`;
+        xml += `        <quantmax>${vals.quantmax}</quantmax>\n`;
+        xml += `        <cost>${vals.cost}</cost>\n`;
+        xml += `        <flags count_in_cargo="${flags.cargo}" count_in_hoarder="${flags.hoarder}" count_in_map="${flags.map}" count_in_player="${flags.player}" crafted="${flags.crafted}" deloot="${flags.deloot}" />\n`;
+
+        categories.forEach(c => xml += `        <category name="${c}" />\n`);
+        usages.forEach(u => xml += `        <usage name="${u}" />\n`);
+        values.forEach(v => xml += `        <value name="${v}" />\n`);
+        tags.forEach(t => xml += `        <tag name="${t}" />\n`);
+
+        xml += `    </type>\n`;
+    });
+
+    xml += '</types>';
+
+    document.getElementById('xmlOutput').textContent = xml;
+    document.getElementById('stats').textContent = `${classes.length} item(s) generated`;
+
+    if (!quiet) {
+        showMessage('XML generated successfully!', 'success');
+    }
 }
 
 async function openClassFile() {
     try {
         if (!window.electronAPI || !window.electronAPI.openChatLog) {
-            showMessage('Open File is not available in this build.', 'error');
+            showMessage('Open API not available.', 'error');
             return;
         }
         const result = await window.electronAPI.openChatLog();
         if (!result || result.canceled) return;
-        if (result.error) {
-            showMessage('Failed to open file: ' + result.error, 'error');
-            return;
-        }
-        const textarea = document.getElementById('classInput');
-        textarea.value = result.content || '';
-        const name = (result.filePath || '').split(/[/\\]/).pop() || 'file';
-        showMessage('Loaded ' + name, 'success');
+
+        document.getElementById('classInput').value = result.content || '';
+        generateXML(true);
+        showMessage('File imported', 'success');
     } catch (err) {
-        showMessage('Error: ' + err, 'error');
+        showMessage('Error: ' + err.message, 'error');
     }
-}
-
-function generateXML() {
-    const raw = document.getElementById('classInput').value || '';
-    const classes = raw.split(/\r?\n/).filter(l => l.trim().length > 0).map(l => l.trim());
-
-    if (classes.length === 0) {
-        showMessage('Please enter at least one class name', 'error');
-        return;
-    }
-
-    // Get settings
-    const nominal = document.getElementById('nominal').value;
-    const lifetime = document.getElementById('lifetime').value;
-    const restock = document.getElementById('restock').value;
-    const min = document.getElementById('min').value;
-    const quantmin = document.getElementById('quantmin').value;
-    const quantmax = document.getElementById('quantmax').value;
-    const cost = document.getElementById('cost').value;
-
-    // Get flags
-    const countInCargo = document.getElementById('countInCargo').checked ? '1' : '0';
-    const countInHoarder = document.getElementById('countInHoarder').checked ? '1' : '0';
-    const countInMap = document.getElementById('countInMap').checked ? '1' : '0';
-    const countInPlayer = document.getElementById('countInPlayer').checked ? '1' : '0';
-    const crafted = document.getElementById('crafted').checked ? '1' : '0';
-    const deloot = document.getElementById('deloot').checked ? '1' : '0';
-
-    // Get selected options
-    const selectedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked')).map(cb => cb.value);
-    const selectedUsages = Array.from(document.querySelectorAll('.usage-checkbox:checked')).map(cb => cb.value);
-    const selectedValues = Array.from(document.querySelectorAll('.value-checkbox:checked')).map(cb => cb.value);
-    const selectedTags = Array.from(document.querySelectorAll('.tag-checkbox:checked')).map(cb => cb.value);
-
-    // Build XML
-    let xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<types>\n';
-
-    for (const cls of classes) {
-        xml += `    <type name="${cls}">\n`;
-        xml += `        <nominal>${nominal}</nominal>\n`;
-        xml += `        <lifetime>${lifetime}</lifetime>\n`;
-        xml += `        <restock>${restock}</restock>\n`;
-        xml += `        <min>${min}</min>\n`;
-        xml += `        <quantmin>${quantmin}</quantmin>\n`;
-        xml += `        <quantmax>${quantmax}</quantmax>\n`;
-        xml += `        <cost>${cost}</cost>\n`;
-        xml += `        <flags count_in_cargo="${countInCargo}" count_in_hoarder="${countInHoarder}" count_in_map="${countInMap}" count_in_player="${countInPlayer}" crafted="${crafted}" deloot="${deloot}" />\n`;
-
-        // Add categories
-        for (const category of selectedCategories) {
-            xml += `        <category name="${category}" />\n`;
-        }
-
-        // Add usages
-        for (const usage of selectedUsages) {
-            xml += `        <usage name="${usage}" />\n`;
-        }
-
-        // Add values
-        for (const value of selectedValues) {
-            xml += `        <value name="${value}" />\n`;
-        }
-
-        // Add tags
-        for (const tag of selectedTags) {
-            xml += `        <tag name="${tag}" />\n`;
-        }
-
-        xml += `    </type>\n`;
-    }
-
-    xml += '</types>';
-
-    document.getElementById('xmlOutput').textContent = xml;
-    document.getElementById('stats').textContent = `Generated ${classes.length} item(s)`;
-    showMessage('XML generated successfully!', 'success');
 }
 
 async function saveXML() {
-    const xmlOutput = document.getElementById('xmlOutput').textContent;
-
-    if (!xmlOutput || xmlOutput.trim() === '') {
-        showMessage('Please generate XML first!', 'error');
+    const xmlContent = document.getElementById('xmlOutput').textContent;
+    if (!xmlContent) {
+        showMessage('Nothing to save.', 'error');
         return;
     }
 
     try {
-        if (!window.electronAPI || !window.electronAPI.saveFile) {
-            showMessage('Save File is not available in this build.', 'error');
-            return;
+        const result = await window.electronAPI.saveFile(xmlContent, 'types.xml');
+        if (result && !result.canceled) {
+            showMessage('types.xml saved!', 'success');
         }
-        const result = await window.electronAPI.saveFile(xmlOutput, 'items.xml');
-        if (!result || result.canceled) return;
-        if (result.error) {
-            showMessage('Failed to save file: ' + result.error, 'error');
-            return;
-        }
-        showMessage('XML saved successfully!', 'success');
     } catch (err) {
-        showMessage('Error: ' + err, 'error');
+        showMessage('Save failed: ' + err.message, 'error');
     }
 }
 
 function copyXML() {
-    const xmlOutput = document.getElementById('xmlOutput').textContent;
+    const xmlContent = document.getElementById('xmlOutput').textContent;
+    if (!xmlContent) return;
 
-    if (!xmlOutput || xmlOutput.trim() === '') {
-        showMessage('Please generate XML first!', 'error');
-        return;
-    }
-
-    navigator.clipboard.writeText(xmlOutput).then(() => {
-        showMessage('XML copied to clipboard!', 'success');
-    }).catch(err => {
-        showMessage('Failed to copy: ' + err, 'error');
+    navigator.clipboard.writeText(xmlContent).then(() => {
+        showMessage('XML copied to clipboard', 'success');
     });
 }
 
 function clearAll() {
     document.getElementById('classInput').value = '';
-    document.getElementById('xmlOutput').textContent = '';
-    document.getElementById('stats').textContent = '';
-    // Reset to defaults
+    // Reset defaults
     document.getElementById('nominal').value = '0';
     document.getElementById('lifetime').value = '3888000';
     document.getElementById('restock').value = '0';
@@ -153,34 +122,30 @@ function clearAll() {
     document.getElementById('quantmin').value = '-1';
     document.getElementById('quantmax').value = '-1';
     document.getElementById('cost').value = '100';
+
     document.getElementById('countInCargo').checked = false;
     document.getElementById('countInHoarder').checked = false;
     document.getElementById('countInMap').checked = true;
     document.getElementById('countInPlayer').checked = false;
     document.getElementById('crafted').checked = false;
     document.getElementById('deloot').checked = false;
-    // Uncheck all options
-    document.querySelectorAll('.category-checkbox').forEach(cb => cb.checked = false);
-    document.querySelectorAll('.usage-checkbox').forEach(cb => cb.checked = false);
-    document.querySelectorAll('.value-checkbox').forEach(cb => cb.checked = false);
-    document.querySelectorAll('.tag-checkbox').forEach(cb => cb.checked = false);
+
+    document.querySelectorAll('input[type="checkbox"]').forEach(i => {
+        if (!['countInMap'].includes(i.id)) i.checked = false;
+    });
+
+    generateXML(true);
+    showMessage('Form cleared', 'success');
 }
 
 function showMessage(message, type) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message message-${type}`;
     messageDiv.textContent = message;
-
-    const container = document.querySelector('.container');
-    container.insertBefore(messageDiv, container.firstChild);
+    document.body.appendChild(messageDiv);
 
     setTimeout(() => {
         messageDiv.style.opacity = '0';
         setTimeout(() => messageDiv.remove(), 300);
-    }, 3000);
+    }, 2500);
 }
-
-// Page initialization
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Category 4 - DayZ XML Generator loaded');
-});
