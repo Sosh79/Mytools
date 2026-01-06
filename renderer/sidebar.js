@@ -30,6 +30,10 @@ function injectSidebar() {
                     <span class="nav-icon">🛠️</span>
                     <span class="nav-label">XML Generator</span>
                 </a>
+                <a href="#" class="nav-item" onclick="navigateToPage('category5')">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Server Info</span>
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-profile">
@@ -56,6 +60,18 @@ function injectSidebar() {
                 item.classList.add('active');
             }
         });
+
+        // Dynamic Username
+        if (window.electronAPI && window.electronAPI.getUsername) {
+            window.electronAPI.getUsername().then(username => {
+                const nameEl = sidebarContainer.querySelector('.user-name');
+                const avatarEl = sidebarContainer.querySelector('.avatar');
+                if (username) {
+                    if (nameEl) nameEl.textContent = username;
+                    if (avatarEl) avatarEl.textContent = username.charAt(0).toUpperCase();
+                }
+            }).catch(err => console.error('Failed to fetch username:', err));
+        }
     }
 }
 

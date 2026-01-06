@@ -8,6 +8,16 @@ function goToCategory(categoryName) {
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Home page loaded successfully');
 
+    // Dynamic Username
+    if (window.electronAPI && window.electronAPI.getUsername) {
+        window.electronAPI.getUsername().then(username => {
+            const title = document.getElementById('welcome-title');
+            if (title && username) {
+                title.innerText = `Welcome Back, ${username}`;
+            }
+        });
+    }
+
     // You can add more functions here
     const cards = document.querySelectorAll('.card');
     cards.forEach((card, index) => {

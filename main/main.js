@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const { createMenu } = require('./menu');
 
 let mainWindow;
@@ -25,8 +26,9 @@ function createWindow() {
     // Load home page
     loadPage('home');
 
-    // Create menu
-    createMenu(mainWindow, loadPage);
+    // Remove native menu for premium look
+    mainWindow.setMenu(null);
+    // createMenu(mainWindow, loadPage);
 
     // Open dev tools in development mode
     // mainWindow.webContents.openDevTools();
@@ -98,5 +100,14 @@ ipcMain.handle('save-file', async (event, content, defaultName) => {
         return { canceled: false, filePath };
     } catch (err) {
         return { canceled: true, error: String(err) };
+    }
+});
+
+// Handle get username request
+ipcMain.handle('get-username', () => {
+    try {
+        return os.userInfo().username;
+    } catch (e) {
+        return process.env.USERNAME || 'User';
     }
 });

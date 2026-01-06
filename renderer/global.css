@@ -114,7 +114,9 @@ h3,
 }
 
 /* Inputs */
-.input-premium {
+/* Inputs */
+.input-field,
+.textarea-field {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
@@ -122,13 +124,20 @@ h3,
     color: white;
     width: 100%;
     transition: var(--transition-smooth);
+    font-family: 'Inter', sans-serif;
 }
 
-.input-premium:focus {
+.input-field:focus,
+.textarea-field:focus {
     outline: none;
     border-color: var(--accent-primary);
     background: rgba(0, 0, 0, 0.3);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.textarea-field {
+    resize: vertical;
+    min-height: 100px;
 }
 
 /* Sidebar */

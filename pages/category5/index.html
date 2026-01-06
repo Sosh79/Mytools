@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Server Config Editor - MyTools</title>
+  <link rel="stylesheet" href="../../renderer/global.css">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+  <div id="sidebar-container"></div>
+
+  <div class="has-sidebar split-pane-container">
+    <!-- Left Pane: Inputs -->
+    <section class="pane input-pane">
+      <header class="pane-header">
+        <div class="header-main">
+          <h1>Server Info</h1>
+          <p class="subtitle">Edit Server Configuration</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn-toggle-preview" onclick="togglePreview()">Show/Hide Preview</button>
+          <button class="btn-premium" onclick="openJSONFile()">Open Config</button>
+        </div>
+      </header>
+
+      <div class="scroll-content">
+        <!-- General Settings -->
+        <div class="config-section glass-card">
+            <div class="section-header-compact">
+              <span class="icon">⚙️</span>
+              <h4>General Settings</h4>
+            </div>
+            <div class="form-grid" oninput="generateJSON()">
+              <div class="form-group full-width">
+                <label>Server Name</label>
+                <input type="text" id="serverName" class="input-field" placeholder="Welcome to Server...">
+              </div>
+              <div class="form-group">
+                <label>Config Version</label>
+                <input type="text" id="configVersion" class="input-field" value="1.0">
+              </div>
+              <div class="form-group">
+                <label>Display Player Status</label>
+                <select id="displayPlayerStatus" class="input-field">
+                    <option value="1">Enabled</option>
+                    <option value="0">Disabled</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Display Server Info</label>
+                <select id="displayServer" class="input-field">
+                    <option value="1">Enabled</option>
+                    <option value="0">Disabled</option>
+                </select>
+              </div>
+            </div>
+        </div>
+
+        <!-- Links -->
+        <div class="divider-text">LINKS</div>
+        <div class="form-grid" oninput="generateJSON()">
+            <div class="form-group full-width">
+              <label>Discord Link</label>
+              <input type="text" id="discordLink" class="input-field" placeholder="https://discord.gg/...">
+            </div>
+            <div class="form-group full-width">
+              <label>Donation Link</label>
+              <input type="text" id="donationLink" class="input-field" placeholder="https://...">
+            </div>
+        </div>
+
+        <!-- Admins -->
+        <div class="divider-text">ADMINS</div>
+        <div class="section-container">
+            <div id="adminsContainer" class="entries-list"></div>
+            <button class="btn-secondary-custom full-width-btn" onclick="addAdmin()">+ Add Admin ID</button>
+        </div>
+
+        <!-- Rules -->
+        <div class="divider-text">SERVER RULES (HTML)</div>
+        <div class="section-container">
+            <div id="rulesContainer" class="entries-list"></div>
+            <button class="btn-secondary-custom full-width-btn" onclick="addRule()">+ Add Rule Line</button>
+        </div>
+
+      </div>
+
+      <footer class="pane-footer">
+        <div class="button-group-unified">
+          <button class="btn-warning-custom" onclick="clearForm()">Clear All</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- Right Pane: Preview -->
+    <section class="pane output-pane glass">
+      <header class="pane-header">
+        <div class="header-main">
+          <h2>JSON Preview</h2>
+          <div id="stats" class="subtitle stats-badge">Valid JSON</div>
+        </div>
+        <div class="header-actions">
+          <button class="btn-premium btn-neon" onclick="copyJSON()">Copy Code</button>
+          <button class="btn-premium" onclick="saveJSON()">Save File</button>
+        </div>
+      </header>
+
+      <div class="code-wrapper scroll-content">
+        <pre id="jsonOutput" class="json-code"></pre>
+      </div>
+    </section>
+  </div>
+
+  <script src="../../renderer/navigation.js"></script>
+  <script src="../../renderer/sidebar.js"></script>
+  <script src="./script.js"></script>
+</body>
+
+</html>
