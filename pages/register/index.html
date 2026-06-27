@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - MyTools</title>
+  <link rel="stylesheet" href="../../renderer/global.css">
+  <link rel="stylesheet" href="../login/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card glass-card">
+      <div class="login-header">
+        <h2>Create Account</h2>
+        <p>Register to access your tools</p>
+      </div>
+      <form id="register-form">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" required placeholder="Choose a username">
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Choose a password">
+        </div>
+        <div class="input-group">
+          <label for="confirm-password">Confirm Password</label>
+          <input type="password" id="confirm-password" required placeholder="Confirm password">
+        </div>
+        <div id="error-message" class="error-message"></div>
+        <div id="success-message" class="error-message" style="color: #10b981;"></div>
+        <button type="submit" class="btn-primary" id="register-btn">Register</button>
+      </form>
+      <div class="login-footer">
+        <p>Already have an account? <a href="#" onclick="goToLogin()">Login here</a></p>
+      </div>
+    </div>
+  </div>
+  <script src="../../renderer/navigation.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>

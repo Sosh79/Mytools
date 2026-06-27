@@ -2,7 +2,23 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+
+// Polyfill crypto for MongoDB in Electron
+const crypto = require('crypto');
+if (!global.crypto) {
+    global.crypto = crypto;
+}
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const User = require('./models/User');
 const { createMenu } = require('./menu');
+
+// Connect to MongoDB
+mongoose.connect('mongodb://127.0.0.1:27017/mytools').then(() => {
+    console.log('Connected to MongoDB successfully');
+}).catch(err => {
+    console.error('MongoDB connection error:', err);
+});
 
 let mainWindow;
 
@@ -23,8 +39,8 @@ function createWindow() {
 
     mainWindow.maximize();
 
-    // Load home page
-    loadPage('home');
+    // Load login page initially
+    loadPage('login');
 
     // Remove native menu for premium look
     mainWindow.setMenu(null);
@@ -109,5 +125,78 @@ ipcMain.handle('get-username', () => {
         return os.userInfo().username;
     } catch (e) {
         return process.env.USERNAME || 'User';
+    }
+});
+
+// Auth Handlers
+ipcMain.handle('login-attempt', async (event, username, password) => {
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return { success: false, message: 'Invalid username or password' };
+        }
+        
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch) {
+            return { success: true, message: 'Login successful' };
+        } else {
+            return { success: false, message: 'Invalid username or password' };
+        }
+    } catch (err) {
+        console.error('Login error:', err);
+        return { success: false, message: 'Database error: ' + err.message };
+    }
+});
+
+ipcMain.handle('register-attempt', async (event, username, password) => {
+    try {
+        const existingUser = await User.findOne({ username });
+        if (existingUser) {
+            return { success: false, message: 'Username already exists' };
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            username,
+            password: hashedPassword
+        });
+        
+        await newUser.save();
+        return { success: true, message: 'Registration successful' };
+    } catch (err) {
+        console.error('Registration error:', err);
+        return { success: false, message: 'Database error: ' + err.message };
+    }
+});
+
+ipcMain.handle('update-profile', async (event, currentUsername, newUsername, oldPassword, newPassword) => {
+    try {
+        const user = await User.findOne({ username: currentUsername });
+        if (!user) {
+            return { success: false, message: 'User not found' };
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) {
+            return { success: false, message: 'Incorrect old password' };
+        }
+
+        if (newUsername && newUsername !== currentUsername) {
+            const existingUser = await User.findOne({ username: newUsername });
+            if (existingUser) {
+                return { success: false, message: 'New username is already taken' };
+            }
+            user.username = newUsername;
+        }
+
+        if (newPassword) {
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        await user.save();
+        return { success: true, message: 'Profile updated successfully' };
+    } catch (err) {
+        console.error('Update profile error:', err);
+        return { success: false, message: 'Database error: ' + err.message };
     }
 });

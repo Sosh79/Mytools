@@ -50,5 +50,9 @@
       "assets/**/*",
       "package.json"
     ]
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "mongoose": "^9.7.3"
   }
 }

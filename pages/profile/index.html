@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - MyTools</title>
+  <link rel="stylesheet" href="../../renderer/global.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="sidebar-container"></div>
+  <div class="has-sidebar container">
+    <header class="dashboard-header">
+      <div class="hero-section glass-card">
+        <div class="hero-content">
+          <h1 class="hero-title">Profile Settings</h1>
+          <p class="hero-subtitle">Update your username or change your password.</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="profile-main">
+      <div class="profile-card glass-card">
+        <form id="profile-form">
+          <div class="input-group">
+            <label for="new-username">Username</label>
+            <input type="text" id="new-username" placeholder="Enter new username (optional)">
+          </div>
+          
+          <div class="divider"></div>
+          
+          <div class="input-group">
+            <label for="old-password">Current Password (Required to save changes)</label>
+            <input type="password" id="old-password" required placeholder="Enter current password">
+          </div>
+          
+          <div class="input-group">
+            <label for="new-password">New Password (Optional)</label>
+            <input type="password" id="new-password" placeholder="Enter new password">
+          </div>
+
+          <div class="input-group">
+            <label for="confirm-password">Confirm New Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm new password">
+          </div>
+
+          <div id="message-container" class="message-container"></div>
+          
+          <button type="submit" class="btn-primary" id="save-btn">Save Changes</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <script src="../../renderer/navigation.js"></script>
+  <script src="../../renderer/sidebar.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
