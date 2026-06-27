@@ -1,5 +1,6 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const os = require('os');
 
@@ -14,8 +15,13 @@ const User = require('./models/User');
 const { createMenu } = require('./menu');
 
 // Connect to MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/mytools').then(() => {
-    console.log('Connected to MongoDB successfully');
+const isProd = app.isPackaged;
+const mongoURI = isProd 
+    ? process.env.MONGO_URI_PROD
+    : (process.env.MONGO_URI_LOCAL || 'mongodb://127.0.0.1:27017/mytools');
+
+mongoose.connect(mongoURI).then(() => {
+    console.log('Connected to MongoDB successfully:', isProd ? 'Cloud Database (Production)' : 'Local Database (Development)');
 }).catch(err => {
     console.error('MongoDB connection error:', err);
 });
